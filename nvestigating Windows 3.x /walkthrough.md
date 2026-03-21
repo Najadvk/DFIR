@@ -1,4 +1,4 @@
-# Endpoint Investigation Walkthrough
+# Investigating Windows 3.x - Tryhackme 
 
 This walkthrough documents the investigation of a compromised Windows endpoint. The objective is to identify persistence mechanisms, analyze an encoded payload, trace process execution, uncover command-and-control (C2) communication, and understand how the attacker maintained access and performed actions on the system.
 
