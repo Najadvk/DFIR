@@ -1,4 +1,4 @@
-<img width="3143" height="1303" alt="Screenshot 2026-03-22 174315" src="https://github.com/user-attachments/assets/29d2d40e-42ec-47e0-a10d-e922ebaa9e3f" /># Investigating Windows 3.x - Tryhackme 
+# Investigating Windows 3.x - Tryhackme 
 
 This walkthrough documents the investigation of a compromised Windows endpoint. The objective is to identify persistence mechanisms, analyze an encoded payload, trace process execution, uncover command-and-control (C2) communication, and understand how the attacker maintained access and performed actions on the system.
 
