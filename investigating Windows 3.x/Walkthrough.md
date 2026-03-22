@@ -115,7 +115,7 @@ Answer:C:\Windows\System32\ualapi.dll (Refer to the image in Q8)
 ---
 
 ### 10.  What is the Windows Event ID associated with this service?
-The question references the FXSSVC service, and the hint in TRYhackme indicates that the related DLL is associated with the Print Spooler or Fax service. Based on this, the investigation is focused on Windows service logs.
+The question references the FXSSVC service, and the hint in Tryhackme indicates that the related DLL is associated with the Print Spooler or Fax service. Based on this, the investigation is focused on Windows service logs.
 
 Open Event Viewer and navigate to: Microsoft → Windows → PrintService → Admin
 
@@ -128,17 +128,17 @@ Answer: 823
 ``` 
 ---
 
-### 10. What is listed as the New Default Printer?
+### 11. What is listed as the New Default Printer?
 
 Within the same set of logs, a change to the system configuration is observed. The attacker sets a new default printer, which is clearly visible in the event details.
 
 ``` bash
-Answer: Print Demon (Refer to the image in Q9)
+Answer: Print Demon (Refer to the image in Q10)
 
 ``` 
 ---
 
-### 11. What process is associated with this event?
+### 12. What process is associated with this event?
 
 To determine which process triggered this activity, Process Monitor is used. , use the filter to get the process of the print demon
 
@@ -151,7 +151,7 @@ Answer:spoolsv.exe
 ``` 
 ---
 
-### 12.  What is the parent PID for the above process?
+### 13.  What is the parent PID for the above process?
 
 From the same Process Monitor entry, the parent process ID can be observed. This helps trace process lineage and understand how the activity was initiated.
 
@@ -160,7 +160,7 @@ Answer:620
 ``` 
 ---
 
-### 13. Examine the other processes. What is the PID of the process running the encoded payload?
+### 14. Examine the other processes. What is the PID of the process running the encoded payload?
 
 From earlier analysis, it is clear that the payload is executed via PowerShell. To identify the exact process, Process Monitor was filtered for powershell.exe, specifically looking for command-line arguments containing -enc, which indicates encoded execution.
 
@@ -181,7 +181,7 @@ Answer:3088
 ``` 
 ---
 
-### 14 Decode the payload. What is a visible partial path?
+### 15 Decode the payload. What is a visible partial path?
 
 From the decoded PowerShell script, part of the network communication path is visible. This path indicates how the compromised system communicates with the attacker.
 
@@ -193,7 +193,7 @@ Answer: /admin/get.php
 ``` 
 ---
 
-### 15. What attack framework was used? What is the name of the variable?
+### 16. What attack framework was used? What is the name of the variable?
 
 To identify the attack framework, the files located in Documents\20210121 were examined. This directory contained multiple artifacts related to the attacker’s activity.
 
@@ -213,7 +213,7 @@ Answer:DefaultProfile, Empire
 ``` 
 ---
 
-### 16. What other file paths are you likely to find in the logs?
+### 17. What other file paths are you likely to find in the logs?
 
 Based on the default communication profile used by the framework, additional endpoints are commonly observed in network traffic are 
 
@@ -222,7 +222,7 @@ Answer: /news.php, /login/process.php
 ``` 
 ---
 
-## 17. What is the MITRE ATT&CK URL for the attack framework?
+## 18. What is the MITRE ATT&CK URL for the attack framework?
 
 To find attack framework, additional research was performed using the MITRE ATT&CK framework.
 
@@ -236,7 +236,7 @@ Answer: https://attack.mitre.org/software/S0363/
 
 ``` 
 
-### 18. What was the FQDN of the attacker machine that the suspicious process connected to?
+### 19. What was the FQDN of the attacker machine that the suspicious process connected to?
 
 Within the PowerShell script, a Base64-encoded string is found. Decoding this string reveals an IP address used for command-and-control communication.
 
@@ -255,7 +255,7 @@ This resolves the IP address to its associated domain.
 Answer:ec2-34-248-128-161.eu-west-1.compute.amazonaws.com
 ``` 
 
-### 19. What other process connected to the attacker machine?
+### 20. What other process connected to the attacker machine?
 
 Process Monitor was filtered for TCP connections to identify outbound communication. Two processes were observed connecting to the attacker domain. Since powershell.exe was already identified earlier, the remaining process is explorer.exe.
 <img width="2393" height="427" alt="image" src="https://github.com/user-attachments/assets/1c76a8f9-e594-4b2d-8345-545fadb299f6" />
@@ -266,16 +266,16 @@ Answer: explorer.exe
 ```
 ---
 
-### 20. What is the PID for this process?
+### 21. What is the PID for this process?
 
-From the same Process Monitor results, the process ID of the identified process is obtained. (Refer the image in Q19)
+From the same Process Monitor results, the process ID of the identified process is obtained. (Refer the image in Q20)
 
 ``` bash
 Answer:2684
 ``` 
 ---
 
-### 21. What was the path for the first image loaded for this process?
+### 22. What was the path for the first image loaded for this process?
 
 Using the identified PID, Process Monitor was filtered to isolate the specific process. An additional filter for Load Image events was applied, which reveals the path of the first loaded module
 
@@ -288,84 +288,102 @@ Answer:C:\Windows\System32\mscoree.dll
 ``` 
 ---
 
-### 22. What Sysmon event was generated between these 2 processes? What is its associated Event ID?
+### 23. What Sysmon event was generated between these 2 processes? What is its associated Event ID?
 
-Sysmon logs are reviewed again to identify interactions between `powershell.exe` and `explorer.exe`. An event is identified where one process interacts with another by creating a thread.
+Sysmon logs were reviewed in Event Viewer to identify interactions between powershell.exe and explorer.exe, as earlier analysis indicated possible process injection.
 
-This behavior is indicative of process injection.
+Filtering for events containing both processes revealed an entry where:
 
-![Injection](images/injection.png)
+powershell.exe is listed as the SourceImage
+explorer.exe is listed as the TargetImage
 
-Answer:
-CreateRemoteThread, 8
+This indicates that PowerShell is interacting directly with another running process. The event details show Event ID 8, which corresponds to CreateRemoteThread.
+
+This event is significant because it represents one process creating a thread inside another, a common technique used for process injection to execute malicious code within a legitimate process.
+
+<img width="1891" height="1072" alt="image" src="https://github.com/user-attachments/assets/f1a42e75-6fa7-43e7-87b6-d18adca2b5ef" />
+
+``` bash
+Answer: CreateRemoteThread, 8
+``` 
+---
+
+### 24. What is the UTC time for the first event between these 2 processes?
+
+The timestamp for this interaction is obtained directly from the same Sysmon event.
+
+<img width="1915" height="1100" alt="image" src="https://github.com/user-attachments/assets/b1f6fbac-a974-400a-9f9a-2c32bdc8a32e" />
+
+``` bash
+Answer: 2021-01-22 01:07:06.182
+
+``` 
 
 ---
 
-### What is the UTC time for the first event between these 2 processes?
+### 25.  What is the value under Date and Time?
 
-The timestamp for this interaction is obtained directly from the Sysmon event.
-
-Answer:
-2021-01-22 01:07:06.182
-
+The corresponding local system time is also recorded in the logs(Refer the image in Q24)
+``` bash
+Answer:1/21/2021 5:07:06 PM
+``` 
 ---
 
-### What is the value under Date and Time?
-
-The corresponding local system time is also recorded in the logs.
-
-Answer:
-1/21/2021 5:07:06 PM
-
----
-
-### What is the first operation listed by the 2nd process starting with the Date and Time from the previous question?
+### 26.  What is the first operation listed by the 2nd process starting with the Date and Time from the previous question?
 
 Using Process Monitor and aligning with the identified timestamp, the first recorded operation for the injected process is determined.
 
-Answer:
-Thread Create
-
+``` bash
+Answer:Thread Create
+``` 
 ---
 
-### What is the full registry path that was queried by the attacker to get information about the victim?
+### 27. What is the full registry path that was queried by the attacker to get information about the victim?
 
 Due to the large volume of logs in Process Monitor, filtering is necessary. The focus is placed on `explorer.exe` performing registry queries.
 
 Entries with the result **BUFFER OVERFLOW** are particularly useful, as they often indicate attempts to retrieve data from the registry. Analyzing these entries reveals the specific registry path accessed by the attacker.
 
-![Registry](images/registry.png)
+<img width="2925" height="1179" alt="image" src="https://github.com/user-attachments/assets/1d86ab75-0e45-45a7-b442-b5255ba63aaf" />
 
-Answer:
-HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ReleaseId
+``` bash
 
+Answer:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ReleaseId
+``` 
 ---
 
-### What is the name of the last module in the stack from this event which had a successful result?
+### 28. What is the name of the last module in the stack from this event which had a successful result?
 
 By examining the stack trace of the identified registry query event, the last module in the call stack can be observed.
 
-Answer:
-<unknown>
+<img width="2781" height="1176" alt="image" src="https://github.com/user-attachments/assets/35234bb6-de57-4ebc-a6a0-91e9cc139cf6" />
+``` bash
 
+Answer:<unknown>
+``` 
 ---
 
-### Most likely what module within the attack framework was used between the 2 processes?
+### 29. Most likely what module within the attack framework was used between the 2 processes?
 
-Based on earlier findings, including the presence of PowerShell Empire and the observed process injection behavior, the specific module used can be inferred.
+Based on earlier findings, including the presence of PowerShell Empire and the observed process injection behavior, the specific module used can be inferred (Refer the Q16)
 
-Answer:
-Invoke-PSInject
+``` bash
 
+Answer:Invoke-PSInject
+``` 
 ---
 
-### What is the MITRE ID for this technique?
+### 30 What is the MITRE ID for this technique?
 
-The observed behavior corresponds to process injection. Referencing the MITRE ATT&CK framework provides the technique identifier.
+To identify the corresponding MITRE ATT&CK technique, process injection  was researched on the MITRE ATT&CK framework.
 
-Answer:
-T1055
+<img width="3190" height="1148" alt="image" src="https://github.com/user-attachments/assets/f3ab5316-6893-40c2-9763-13fe6c043543" />
 
+
+``` bash
+
+Answer:T1055
+```
 ---
 
 ## Conclusion
