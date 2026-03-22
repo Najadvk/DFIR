@@ -390,6 +390,30 @@ To identify the corresponding MITRE ATT&CK technique, process injection  was res
 Answer:T1055
 ```
 ---
+## Attack Summary
+
+The attacker established persistence via a registry run key containing an obfuscated PowerShell payload. 
+
+Upon execution, the payload performed multiple actions including:
+- Disabling and interacting with system services (Fax service)
+- Opening a local port for communication
+- Establishing outbound communication to a remote C2 server
+
+The attacker leveraged the PowerShell Empire framework, using its default communication profile for command-and-control.
+
+To evade detection and blend with legitimate processes, the payload injected code into `explorer.exe` using a remote thread creation technique (Sysmon Event ID 8).
+
+Additionally, the attacker performed system reconnaissance by querying registry values to gather information about the victim system.
+
+## Attack Timeline
+
+- Persistence established via registry run key
+- Encoded PowerShell payload executed
+- Child PowerShell process spawned
+- Payload decoded and executed
+- Connection initiated to external C2 server
+- Code injected into explorer.exe (CreateRemoteThread)
+- Registry queries performed for system reconnaissance
 
 ## Conclusion
 
