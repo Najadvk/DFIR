@@ -5,8 +5,7 @@
 ![Tools](https://img.shields.io/badge/Tools-Sysmon%20%7C%20Procmon-green)
 ![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
 
-This walkthrough documents the investigation of a compromised Windows endpoint. The objective is to identify persistence mechanisms, analyze an encoded payload, trace process execution, uncover command-and-control (C2) communication, and understand how the attacker maintained access and performed actions on the system.
-
+This walkthrough documents the investigation of a compromised Windows endpoint. The objective is to find the artifacts resident on the endpoint and sift through captured data to determine what type attack occurred on the endpoint.
 The analysis is performed using tools such as Autoruns, Sysmon logs, Event Viewer, and Process Monitor. Each step builds on the previous one to reconstruct the attacker’s activity.
 
 ---
