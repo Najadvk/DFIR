@@ -138,60 +138,79 @@ Answer: Print Demon (Refer to the image in Q9)
 ``` 
 ---
 
-### What process is associated with this event?
+### 11. What process is associated with this event?
 
-To determine which process triggered this activity, Process Monitor is used. By filtering relevant operations, the process responsible for interacting with the print service is identified.
+To determine which process triggered this activity, Process Monitor is used. , use the filter to get the process of the print demon
 
-![Procmon](images/procmon.png)
+<img width="2484" height="1360" alt="image (18)" src="https://github.com/user-attachments/assets/7443ec85-42bc-43dc-b50f-5a7b8c6bc5e9" />
 
-Answer:
-spoolsv.exe
 
+``` bash
+Answer:spoolsv.exe
+
+``` 
 ---
 
-### What is the parent PID for the above process?
+### 12.  What is the parent PID for the above process?
 
 From the same Process Monitor entry, the parent process ID can be observed. This helps trace process lineage and understand how the activity was initiated.
 
-Answer:
-620
-
+``` bash
+Answer:620
+``` 
 ---
 
-### Examine the other processes. What is the PID of the process running the encoded payload?
+### 13. Examine the other processes. What is the PID of the process running the encoded payload?
 
-Process Monitor is further used to analyze running processes. Filtering for `powershell.exe` and looking for encoded execution (typically using the `-enc` flag) reveals two processes:
+From earlier analysis, it is clear that the payload is executed via PowerShell. To identify the exact process, Process Monitor was filtered for powershell.exe, specifically looking for command-line arguments containing -enc, which indicates encoded execution.
 
-- A parent PowerShell process
-- A child PowerShell process
+This reveals two related processes:
 
-The parent process spawns the child process, and the encoded payload is executed within the child process. This is a common technique used to separate execution context.
+PID 3624 (powershell.exe) acting as the parent process
 
-![PowerShell](images/powershell.png)
+A Process Create event where it spawns another PowerShell instance
 
-Answer:
-3088
+The newly created child process with PID 3088
 
+Since encoded PowerShell commands are typically executed in the spawned child process rather than the parent, the actual payload execution occurs within PID 3088.
+
+<img width="2090" height="330" alt="image (19)" src="https://github.com/user-attachments/assets/49b4076c-2ed5-4ff7-9226-7eee47c9d24f" />
+
+``` bash
+Answer:3088
+``` 
 ---
 
-### Decode the payload. What is a visible partial path?
+### 14 Decode the payload. What is a visible partial path?
 
 From the decoded PowerShell script, part of the network communication path is visible. This path indicates how the compromised system communicates with the attacker.
 
-Answer:
-/admin/get.php
+<img width="2390" height="1230" alt="image (20)" src="https://github.com/user-attachments/assets/14d050d5-2f71-40c8-b1e0-e7b4e9041bc9" />
 
+
+``` bash
+Answer: /admin/get.php
+``` 
 ---
 
-### What attack framework was used? What is the name of the variable?
+### 15. What attack framework was used? What is the name of the variable?
 
-During further investigation, a script named **Invoke-PSInject** is identified within the system. This script is commonly associated with the PowerShell Empire framework.
+To identify the attack framework, the files located in Documents\20210121 were examined. This directory contained multiple artifacts related to the attacker’s activity.
 
-Additionally, the communication pattern observed in the payload matches Empire’s default communication profile, confirming the framework used.
+Navigating to: This PC → Documents → 20210121
 
-Answer:
-DefaultProfile, Empire
+all files were reviewed, and one of them (ending in 7954) contained a reference to Invoke-PSInject.
 
+At this point, further research was performed on Invoke-PSInject, which revealed that it is a module associated with the PowerShell Empire framework. This provided a strong indication of the attack framework being used.
+
+To confirm this, the network behavior observed in the decoded payload was compared with known Empire profiles. The path /admin/get.php matched the default communication profile used by Empire agents, confirming the finding.
+
+<img width="2493" height="1207" alt="image (21)" src="https://github.com/user-attachments/assets/fc6857f4-a5fb-4e38-9eb8-54e71c4321cc" />
+
+
+``` bash
+Answer:DefaultProfile, Empire
+``` 
 ---
 
 ### What other file paths are you likely to find in the logs?
