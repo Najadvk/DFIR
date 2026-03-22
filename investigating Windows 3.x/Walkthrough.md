@@ -1,4 +1,4 @@
-# Investigating Windows 3.x - Tryhackme 
+<img width="3143" height="1303" alt="Screenshot 2026-03-22 174315" src="https://github.com/user-attachments/assets/29d2d40e-42ec-47e0-a10d-e922ebaa9e3f" /># Investigating Windows 3.x - Tryhackme 
 
 This walkthrough documents the investigation of a compromised Windows endpoint. The objective is to identify persistence mechanisms, analyze an encoded payload, trace process execution, uncover command-and-control (C2) communication, and understand how the attacker maintained access and performed actions on the system.
 
@@ -213,17 +213,31 @@ Answer:DefaultProfile, Empire
 ``` 
 ---
 
-### What other file paths are you likely to find in the logs?
+### 16. What other file paths are you likely to find in the logs?
 
-Based on the default communication profile used by the framework, additional endpoints are commonly observed in network traffic.
+Based on the default communication profile used by the framework, additional endpoints are commonly observed in network traffic are 
 
-Answer:
-/news.php  
-/login/process.php
-
+``` bash
+Answer: /news.php, /login/process.php
+``` 
 ---
 
-### What was the FQDN of the attacker machine that the suspicious process connected to?
+## 17. What is the MITRE ATT&CK URL for the attack framework?
+
+To find attack framework, additional research was performed using the MITRE ATT&CK framework.
+
+Searching for Empire on MITRE ATT&CK led to the official software entry:
+
+<img width="3187" height="1613" alt="image" src="https://github.com/user-attachments/assets/7079d238-7f3f-4b36-9ca4-7b83752ce2b5" />
+
+
+``` bash
+Answer: https://attack.mitre.org/software/S0363/
+
+
+``` 
+
+### 18. What was the FQDN of the attacker machine that the suspicious process connected to?
 
 Within the PowerShell script, a Base64-encoded string is found. Decoding this string reveals an IP address used for command-and-control communication.
 
