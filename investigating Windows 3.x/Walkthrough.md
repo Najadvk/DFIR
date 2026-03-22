@@ -234,7 +234,6 @@ Searching for Empire on MITRE ATT&CK led to the official software entry:
 ``` bash
 Answer: https://attack.mitre.org/software/S0363/
 
-
 ``` 
 
 ### 18. What was the FQDN of the attacker machine that the suspicious process connected to?
@@ -247,45 +246,49 @@ nslookup 34.245.128.161
 
 This resolves the IP address to its associated domain.
 
-![C2](images/c2.png)
+<img width="2717" height="1265" alt="image" src="https://github.com/user-attachments/assets/dc8e783a-fedc-4498-8536-8cb915a85b04" />
+<img width="2081" height="1334" alt="image" src="https://github.com/user-attachments/assets/346c7d5a-7073-4f6f-ae94-6eb6ceb05947" />
+<img width="1547" height="734" alt="image" src="https://github.com/user-attachments/assets/ec7c8db2-6670-4260-a550-f728826274e7" />
 
-Answer:
-ec2-34-248-128-161.eu-west-1.compute.amazonaws.com
 
+``` bash
+Answer:ec2-34-248-128-161.eu-west-1.compute.amazonaws.com
+``` 
+
+### 19. What other process connected to the attacker machine?
+
+Process Monitor was filtered for TCP connections to identify outbound communication. Two processes were observed connecting to the attacker domain. Since powershell.exe was already identified earlier, the remaining process is explorer.exe.
+<img width="2393" height="427" alt="image" src="https://github.com/user-attachments/assets/1c76a8f9-e594-4b2d-8345-545fadb299f6" />
+
+
+``` bash
+Answer: explorer.exe
+```
 ---
 
-### What other process connected to the attacker machine?
+### 20. What is the PID for this process?
 
-Network activity is analyzed using Process Monitor by filtering for TCP connections. In addition to PowerShell, another process is observed communicating with the same external host.
+From the same Process Monitor results, the process ID of the identified process is obtained. (Refer the image in Q19)
 
-![TCP](images/tcp.png)
-
-Answer:
-explorer.exe
-
+``` bash
+Answer:2684
+``` 
 ---
 
-### What is the PID for this process?
+### 21. What was the path for the first image loaded for this process?
 
-From the same Process Monitor results, the process ID of the identified process is obtained.
+Using the identified PID, Process Monitor was filtered to isolate the specific process. An additional filter for Load Image events was applied, which reveals the path of the first loaded module
 
-Answer:
-2684
+<img width="2574" height="1124" alt="image" src="https://github.com/user-attachments/assets/c10daf0d-5179-4425-8967-2b0653863f2f" />
 
+
+``` bash
+
+Answer:C:\Windows\System32\mscoree.dll
+``` 
 ---
 
-### What was the path for the first image loaded for this process?
-
-To further analyze this process, filtering is applied for **Load Image** events. This reveals the first module loaded by the process.
-
-![ImageLoad](images/imageload.png)
-
-Answer:
-C:\Windows\System32\mscoree.dll
-
----
-
-### What Sysmon event was generated between these 2 processes? What is its associated Event ID?
+### 22. What Sysmon event was generated between these 2 processes? What is its associated Event ID?
 
 Sysmon logs are reviewed again to identify interactions between `powershell.exe` and `explorer.exe`. An event is identified where one process interacts with another by creating a thread.
 
