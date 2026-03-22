@@ -1,5 +1,10 @@
 # Investigating Windows 3.x - Tryhackme 
 
+![Platform](https://img.shields.io/badge/Platform-TryHackMe-red)
+![Category](https://img.shields.io/badge/Category-DFIR-blue)
+![Tools](https://img.shields.io/badge/Tools-Sysmon%20%7C%20Procmon-green)
+![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
+
 This walkthrough documents the investigation of a compromised Windows endpoint. The objective is to identify persistence mechanisms, analyze an encoded payload, trace process execution, uncover command-and-control (C2) communication, and understand how the attacker maintained access and performed actions on the system.
 
 The analysis is performed using tools such as Autoruns, Sysmon logs, Event Viewer, and Process Monitor. Each step builds on the previous one to reconstruct the attacker’s activity.
@@ -357,21 +362,22 @@ Answer:HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ReleaseId
 By examining the stack trace of the identified registry query event, the last module in the call stack can be observed.
 
 <img width="2781" height="1176" alt="image" src="https://github.com/user-attachments/assets/35234bb6-de57-4ebc-a6a0-91e9cc139cf6" />
+
 ``` bash
 
 Answer:<unknown>
 ``` 
----
+
 
 ### 29. Most likely what module within the attack framework was used between the 2 processes?
 
 Based on earlier findings, including the presence of PowerShell Empire and the observed process injection behavior, the specific module used can be inferred (Refer the Q16)
 
 ``` bash
-
 Answer:Invoke-PSInject
+
 ``` 
----
+
 
 ### 30 What is the MITRE ID for this technique?
 
@@ -388,7 +394,15 @@ Answer:T1055
 
 ## Conclusion
 
-This investigation reveals a complete attack chain involving registry-based persistence, obfuscated PowerShell payload execution, service manipulation, command-and-control communication, and process injection.
+This investigation reconstructs a complete attack chain on a Windows endpoint, demonstrating how multiple forensic artifacts can be correlated to uncover malicious activity.
 
-The attacker leveraged PowerShell Empire to maintain stealth, execute commands remotely, and perform system reconnaissance. By correlating artifacts across multiple tools, it is possible to reconstruct the attack and understand each stage of the compromise.
+Key findings include:
 
+- Persistence established via registry run keys
+- Obfuscated PowerShell payload execution
+- Command-and-control communication over HTTP
+- Use of PowerShell Empire framework
+- Process injection into `explorer.exe` using CreateRemoteThread (Sysmon Event ID 8)
+- System reconnaissance via registry queries
+
+This walkthrough highlights the importance of log correlation, process analysis, and understanding attacker techniques to effectively detect and investigate compromises.
